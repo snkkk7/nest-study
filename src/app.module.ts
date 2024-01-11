@@ -5,11 +5,23 @@ import { AppController } from './app.controller';
 import { AppJapaneseService } from './japan.service';
 import { AppDummy } from './app.dummy';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import ormConfig from './config/orm.config';
 
 
 @Module({
 
-    imports:[EventsModule,ConfigModule.forRoot()],
+    imports:[
+        ConfigModule.forRoot({
+            isGlobal: true,
+            load: [ormConfig],
+            expandVariables: true
+          }),
+          TypeOrmModule.forRootAsync({
+            useFactory: ormConfig
+          }),
+          EventsModule
+          ],
 
     providers: [
                 {

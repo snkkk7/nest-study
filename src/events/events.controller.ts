@@ -15,6 +15,32 @@ export class EventsController  {
 
     }
 
+    // @Get('/practice')
+    // async practice() {
+    //   return await this.repository.find({
+    //     select: ['id', 'when'],
+    //     where: [{
+    //       id: MoreThan(3),
+    //       when: MoreThan(new Date('2021-02-12T13:00:00'))
+    //     }, {
+    //       description: Like('%meet%')
+    //     }],
+    //     take: 2,
+    //     order: {
+    //       id: 'DESC'
+    //     }
+    //   });
+    // }
+
+    @Get('practice2')
+    async practice2() {
+  
+        const event = await this.eventsService.practice2()
+
+        return event
+
+    }
+
     @Get(":id")
     async findOne(@Param("id",ParseIntPipe) id: number){
     
