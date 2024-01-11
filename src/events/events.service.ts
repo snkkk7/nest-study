@@ -1,20 +1,128 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Event } from "./event.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CreateEventDto } from './create-event.dto';
-import { UpdateEventDto } from './update-event.dto';
-import { Attendee } from './attendee.entity';
+import { CreateEventDto } from './input/create-event.dto';
+import { UpdateEventDto } from './input/update-event.dto';
+import { Attendee, AttendeeAnswerEnum } from './attendee.entity';
+import { ListEvents, WhenEventFilter } from './input/list.events';
 
 
 
 @Injectable()
 export class EventsService {
+
+  private readonly logger = new Logger(EventsService.name)
+
     constructor(
         @InjectRepository(Event)
         private readonly repository:Repository<Event>
     ) {}
 
+    private getEventsBaseQuery(){
+
+      return this.repository
+            .createQueryBuilder('e')
+            .orderBy('e.id','DESC')
+
+    }
+
+    public getEventWithAttendeeCountQuery(){
+
+      return this.getEventsBaseQuery()
+                  .loadRelationCountAndMap(
+                    'e.attendeeCount','e.attendees'
+                  )
+                  .loadRelationCountAndMap(
+                    'e.attendeeAccepted',
+                    'e.attendees',
+                    'attendee',
+                    (qb) => qb
+                              .where(
+                                      'attendee.answer = :answer',
+                                     {answer:AttendeeAnswerEnum.Accepted}
+                                    )
+                  ).loadRelationCountAndMap(
+                    'e.attendeeRejected',
+                    'e.attendees',
+                    'attendee',
+                    (qb) => qb
+                              .where(
+                                      'attendee.answer = :answer',
+                                     {answer:AttendeeAnswerEnum.Rejected}
+                                    )
+                  )
+                  .loadRelationCountAndMap(
+                    'e.attendeeMaybe',
+                    'e.attendees',
+                    'attendee',
+                    (qb) => qb
+                              .where(
+                                      'attendee.answer = :answer',
+                                     {answer:AttendeeAnswerEnum.Maybe}
+                                    )
+                  )
+
+    }
+
+    public async getEvent(id:number): Promise<Event | undefined> {
+      const query = this.getEventWithAttendeeCountQuery()
+                  .andWhere('e.id = :id', {id})
+
+      this.logger.debug(query.getSql())
+
+      return await query.getOne()
+
+    }
+
+    public async getEventsWithAttendeeCountFiltered(filter?:ListEvents){
+
+      let query = this.getEventWithAttendeeCountQuery()
+
+      if(!filter){
+        return query.getMany()
+      }
+
+      this.logger.debug(filter)
+
+      if(filter.when){
+        
+        this.logger.debug(filter.when)
+
+        if(filter.when == WhenEventFilter.Today){
+
+     
+
+          query = query.andWhere(
+            "e.when >= CURRENT_DATE AND e.when <= CURRENT_DATE + INTERVAL '1 day'"
+          )
+        }
+
+        if(filter.when == WhenEventFilter.Tommorow){
+          query = query.andWhere(
+            `e.when >= CURRENT_DATE + INTERVAL '1 day' AND e.when <= CURRENT_DATE + INTERVAL '2 day'`
+          )
+        }
+
+        if(filter.when == WhenEventFilter.ThisWeek){
+            query = query.andWhere(
+              `EXTRACT(WEEK FROM e.when) = EXTRACT(WEEK FROM CURRENT_DATE)`
+            )
+        }
+
+        if(filter.when == WhenEventFilter.ThisWeek){
+          query = query.andWhere(
+            `EXTRACT(WEEK FROM e.when) = EXTRACT(WEEK FROM CURRENT_DATE + 1)`
+          )
+      }
+
+      this.logger.log(query.getSql())
+
+      return await query.getMany()
+
+      }
+
+    }
 
     async practice2(){
 
@@ -43,11 +151,11 @@ export class EventsService {
     }
 
     
-    async findAll(){
+    // async findAll(filter:FilterList){
 
-       return this.repository.find()
+    //    const events = await this.getEventsWithAttendeeCountFiltered(filter)
 
-    }
+    // }
 
     async findOne(id: number){
 

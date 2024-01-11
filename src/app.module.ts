@@ -7,6 +7,7 @@ import { AppDummy } from './app.dummy';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import ormConfig from './config/orm.config';
+import { SchoolModule } from './school/school.module';
 
 
 @Module({
@@ -20,7 +21,8 @@ import ormConfig from './config/orm.config';
           TypeOrmModule.forRootAsync({
             useFactory: ormConfig
           }),
-          EventsModule
+          EventsModule,
+          SchoolModule
           ],
 
     providers: [

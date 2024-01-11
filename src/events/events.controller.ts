@@ -1,17 +1,22 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, ValidationPipe } from "@nestjs/common";
-import { CreateEventDto } from "./create-event.dto";
-import { UpdateEventDto } from "./update-event.dto";
+import { Body, Controller, Delete, Get, HttpCode, Logger, Param, ParseIntPipe, Patch, Post, Query, ValidationPipe } from "@nestjs/common";
+import { CreateEventDto } from "./input/create-event.dto";
+import { UpdateEventDto } from "./input/update-event.dto";
 import { EventsService } from "./events.service";
+import { ListEvents } from "./input/list.events";
 
 @Controller('/events')
 export class EventsController  {
 
+    private readonly logger = new Logger(EventsController.name)
+
     constructor(private readonly eventsService : EventsService){}
 
     @Get()
-    async findAll(){
+    async findAll(@Query() filter:ListEvents){
 
-        return await this.eventsService.findAll()
+        this.logger.log(filter.when)
+
+        return await this.eventsService.getEventsWithAttendeeCountFiltered(filter)
 
     }
 
@@ -44,7 +49,7 @@ export class EventsController  {
     @Get(":id")
     async findOne(@Param("id",ParseIntPipe) id: number){
     
-        return await this.eventsService.findOne(id)
+        return await this.eventsService.getEvent(id)
 
     }
 
