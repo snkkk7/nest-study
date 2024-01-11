@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Logger, Param, ParseIntPipe, Patch, Post, Query, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Logger, Param, ParseIntPipe, Patch, Post, Query, UsePipes, ValidationPipe } from "@nestjs/common";
 import { CreateEventDto } from "./input/create-event.dto";
 import { UpdateEventDto } from "./input/update-event.dto";
 import { EventsService } from "./events.service";
@@ -12,11 +12,19 @@ export class EventsController  {
     constructor(private readonly eventsService : EventsService){}
 
     @Get()
+    @UsePipes(new ValidationPipe({transform: true}))
     async findAll(@Query() filter:ListEvents){
 
         this.logger.log(filter.when)
 
-        return await this.eventsService.getEventsWithAttendeeCountFiltered(filter)
+        return await this.eventsService.getEventsWithAttendeeCountFilteredPaginated(
+                                                                                     filter, 
+                                                                                     { 
+                                                                                        total:true,
+                                                                                        currentPage:filter.page,
+                                                                                        limit:2
+                                                                                     }
+                                                                                    )
 
     }
 

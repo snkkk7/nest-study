@@ -6,6 +6,7 @@ import { CreateEventDto } from './input/create-event.dto';
 import { UpdateEventDto } from './input/update-event.dto';
 import { Attendee, AttendeeAnswerEnum } from './attendee.entity';
 import { ListEvents, WhenEventFilter } from './input/list.events';
+import { PaginateOptions, paginate } from '../pagination/paginator';
 
 
 
@@ -75,12 +76,12 @@ export class EventsService {
 
     }
 
-    public async getEventsWithAttendeeCountFiltered(filter?:ListEvents){
+   private async getEventsWithAttendeeCountFiltered(filter?:ListEvents){
 
       let query = this.getEventWithAttendeeCountQuery()
 
       if(!filter){
-        return query.getMany()
+        return query
       }
 
       this.logger.debug(filter)
@@ -118,10 +119,20 @@ export class EventsService {
 
       this.logger.log(query.getSql())
 
-      return await query.getMany()
+      return query
 
       }
 
+    }
+
+    public async getEventsWithAttendeeCountFilteredPaginated(
+      filter:ListEvents,
+      paginateOptions:PaginateOptions
+    ){
+      return paginate(
+        await this.getEventsWithAttendeeCountFiltered(filter),
+        paginateOptions
+      )
     }
 
     async practice2(){
