@@ -1,0 +1,6 @@
+
+
+@Module({})
+export class AuthModule {
+
+}

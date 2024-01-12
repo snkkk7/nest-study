@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Event } from "./event.entity";
-import { Repository } from "typeorm";
+import { DeleteResult, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateEventDto } from './input/create-event.dto';
 import { UpdateEventDto } from './input/update-event.dto';
@@ -161,6 +161,15 @@ export class EventsService {
 
     }
 
+    public async deleteEvent(id:number) : Promise<DeleteResult>{
+
+        return await this.repository
+                          .createQueryBuilder('e')
+                          .delete()
+                          .where('id = :id',{id})
+                          .execute()
+
+    }
     
     // async findAll(filter:FilterList){
 

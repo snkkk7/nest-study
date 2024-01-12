@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import ormConfig from './config/orm.config';
 import { SchoolModule } from './school/school.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -22,7 +23,8 @@ import { SchoolModule } from './school/school.module';
             useFactory: ormConfig
           }),
           EventsModule,
-          SchoolModule
+          SchoolModule,
+          AuthModule,
           ],
 
     providers: [

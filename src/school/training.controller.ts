@@ -18,15 +18,18 @@ export class TrainingController {
     const subject = new Subject();
     subject.name = 'Math';
 
+    await this.subjectRepository.save(subject)
+
     const teacher1 = new Teacher();
     teacher1.name = 'John Doe';
 
     const teacher2 = new Teacher();
     teacher2.name = 'Harry Doe';
 
-    subject.teachers = [teacher1, teacher2];
+    await this.teacherRepository.save([teacher1,teacher2])
 
-    return await this.subjectRepository.save(subject)
+    // subject.teachers = [teacher1, teacher2];
+
 
     // How to use One to One
     // const user = new User();
@@ -49,15 +52,22 @@ export class TrainingController {
 
   @Post('/remove')
   public async removingRelation() {
-    const subject = await this.subjectRepository.findOne({where:{id:1}, relations:['teachers']});
 
-    console.log(subject)
+    await this.subjectRepository.createQueryBuilder('s')
+                                .update()
+                                .set({name:'Confidential'})
+                                .execute()
 
-    subject.teachers = subject.teachers.filter(
-      teacher => teacher.id !== 2
-    );
 
-     await this.subjectRepository.save(subject);
+    // const subject = await this.subjectRepository.findOne({where:{id:1}, relations:['teachers']});
+
+    // console.log(subject)
+
+    // subject.teachers = subject.teachers.filter(
+    //   teacher => teacher.id !== 2
+    // );
+
+    //  await this.subjectRepository.save(subject);
   //   await this.subjectRepository.createQueryBuilder('s')
   //     .update()
   //     .set({ name: "Confidential" })

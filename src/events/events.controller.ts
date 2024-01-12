@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Logger, Param, ParseIntPipe, Patch, Post, Query, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Logger, NotFoundException, Param, ParseIntPipe, Patch, Post, Query, UsePipes, ValidationPipe } from "@nestjs/common";
 import { CreateEventDto } from "./input/create-event.dto";
 import { UpdateEventDto } from "./input/update-event.dto";
 import { EventsService } from "./events.service";
@@ -85,7 +85,11 @@ export class EventsController  {
     @Delete(":id")
     async remove(@Param("id",ParseIntPipe) id : number){
 
-        await this.eventsService.remove(id)
+      const res = await this.eventsService.deleteEvent(id)
+
+      if(res.affected !== 1){
+            throw new NotFoundException()
+      }
 
     }
 }
